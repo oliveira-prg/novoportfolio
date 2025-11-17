@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="pt-BR">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>EigenCalc - Cálculo de Autovalores e Autovetores</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'JetBrains Mono', monospace;
+            background: linear-gradient(135deg, #0a0e17 0%, #1a1f2e 100%);
+            color: #e0e7ff;
+            line-height: 1.6;
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            padding: 2rem 0;
+            border-bottom: 2px solid rgba(0, 217, 255, 0.3);
+        }
+
+        .title {
+            font-size: 3rem;
+            background: linear-gradient(90deg, #00d9ff, #7c3aed);
+            -webkit-background-clip: text;
+            background-clip: text;
+            color: transparent;
+            margin-bottom: 1rem;
+            font-family: 'Orbitron', sans-serif;
+        }
+
+        .subtitle {
+            font-size: 1.2rem;
+            opacity: 0.8;
+            margin-bottom: 2rem;
+        }
+
+        .btn {
+            display: inline-block;
+            padding: 0.8rem 1.5rem;
+            background: transparent;
+            border: 2px solid #00d9ff;
+            color: #00d9ff;
+            text-decoration: none;
+            border-radius: 5px;
+            transition: all 0.3s ease;
+            margin: 0.5rem;
+        }
+
+        .btn:hover {
+            background: rgba(0, 217, 255, 0.1);
+            box-shadow: 0 0 15px rgba(0, 217, 255, 0.3);
+        }
+
+        .content-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 3rem;
+            margin-bottom: 3rem;
+        }
+
+        .card {
+            background: rgba(15, 22, 37, 0.6);
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            border-radius: 10px;
+            padding: 2rem;
+            backdrop-filter: blur(10px);
+        }
+
+        .card h2 {
+            color: #00d9ff;
+            margin-bottom: 1.5rem;
+            font-size: 1.5rem;
+        }
+
+        .features {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 1.5rem;
+            margin-bottom: 3rem;
+        }
+
+        .feature {
+            background: rgba(15, 22, 37, 0.6);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            text-align: center;
+        }
+
+        .feature i {
+            font-size: 2rem;
+            color: #00d9ff;
+            margin-bottom: 1rem;
+        }
+
+        .code-container {
+            background: #1a1f2e;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+            border-radius: 10px;
+            overflow: hidden;
+            margin-bottom: 2rem;
+        }
+
+        .code-header {
+            background: rgba(0, 217, 255, 0.1);
+            padding: 1rem;
+            border-bottom: 1px solid rgba(0, 217, 255, 0.3);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .code-body {
+            padding: 1.5rem;
+            overflow-x: auto;
+        }
+
+        pre {
+            margin: 0;
+            font-family: 'JetBrains Mono', monospace;
+            font-size: 0.9rem;
+            line-height: 1.4;
+        }
+
+        .tech-tags {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+            margin: 1rem 0;
+        }
+
+        .tech-tag {
+            background: rgba(0, 217, 255, 0.1);
+            color: #00d9ff;
+            padding: 0.3rem 0.8rem;
+            border-radius: 15px;
+            font-size: 0.8rem;
+            border: 1px solid rgba(0, 217, 255, 0.3);
+        }
+
+        .output-sample {
+            background: rgba(0, 0, 0, 0.3);
+            padding: 1.5rem;
+            border-radius: 10px;
+            border: 1px solid rgba(0, 217, 255, 0.2);
+            margin-top: 1rem;
+        }
+
+        .output-sample h4 {
+            color: #00d9ff;
+            margin-bottom: 1rem;
+        }
+
+        .back-link {
+            text-align: center;
+            margin-top: 3rem;
+            padding-top: 2rem;
+            border-top: 1px solid rgba(0, 217, 255, 0.3);
+        }
+
+        @media (max-width: 768px) {
+            .content-grid {
+                grid-template-columns: 1fr;
+            }
+            
+            .title {
+                font-size: 2rem;
+            }
+        }
+
+        /* Syntax highlighting */
+        .keyword { color: #ff79c6; }
+        .type { color: #8be9fd; }
+        .function { color: #50fa7b; }
+        .comment { color: #6272a4; }
+        .string { color: #f1fa8c; }
+        .number { color: #bd93f9; }
+        .preprocessor { color: #ffb86c; }
+    </style>
+    <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;600&family=Orbitron:wght@500;700&display=swap" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 class="title">EigenCalc</h1>
+            <p class="subtitle">Cálculo de Autovalores e Autovetores em C</p>
+            <div class="tech-tags" style="justify-content: center;">
+                <span class="tech-tag">C</span>
+                <span class="tech-tag">Álgebra Linear</span>
+                <span class="tech-tag">Método da Potência</span>
+                <span class="tech-tag">CSV Export</span>
+                <span class="tech-tag">Análise Numérica</span>
+            </div>
+        </div>
+
+        <div class="content-grid">
+            <div class="card">
+                <h2><i class="fas fa-info-circle"></i> Sobre o Projeto</h2>
+                <p>O EigenCalc é uma aplicação em C que calcula autovalores e autovetores de matrizes 3x3 usando o método da potência com precisão numérica avançada.</p>
+                
+                <h3 style="margin-top: 1.5rem; color: #7c3aed;">Características Principais:</h3>
+                <ul style="margin-left: 1.5rem; margin-top: 1rem;">
+                    <li>Implementação do método da potência iterativo</li>
+                    <li>Precisão de até 1e-10</li>
+                    <li>Exportação de resultados em formato CSV</li>
+                    <li>Verificação numérica dos resultados</li>
+                    <li>Interface de linha de comando intuitiva</li>
+                </ul>
+
+                <div class="tech-tags">
+                    <span class="tech-tag">Matemática Computacional</span>
+                    <span class="tech-tag">Algoritmos Iterativos</span>
+                    <span class="tech-tag">Processamento de Matrizes</span>
+                </div>
+            </div>
+
+            <div class="card">
+                <h2><i class="fas fa-download"></i> Download e Uso</h2>
+                <p><strong>Requisitos:</strong> Compilador C (GCC recomendado)</p>
+                
+                <div style="margin: 1.5rem 0;">
+                    <a href="#" class="btn"><i class="fab fa-github"></i> Código Fonte</a>
+                    <a href="#" class="btn"><i class="fas fa-download"></i> Executável</a>
+                </div>
+
+                <h3 style="margin-top: 1.5rem; color: #7c3aed;">Compilação:</h3>
+                <div class="output-sample">
+                    <code>gcc -o eigencalc eigencalc.c -lm</code>
+                </div>
+
+                <h3 style="margin-top: 1.5rem; color: #7c3aed;">Execução:</h3>
+                <div class="output-sample">
+                    <code>./eigencalc</code>
+                </div>
+            </div>
+        </div>
+
+        <div class="features">
+            <div class="feature">
+                <i class="fas fa-calculator"></i>
+                <h3>Método da Potência</h3>
+                <p>Implementação eficiente do algoritmo iterativo para encontrar o maior autovalor</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-sliders-h"></i>
+                <h3>Deflação de Matriz</h3>
+                <p>Remove autovalores encontrados sequencialmente para calcular todos os autovalores</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-file-csv"></i>
+                <h3>Exportação CSV</h3>
+                <p>Gera arquivos formatados para análise posterior dos resultados</p>
+            </div>
+            <div class="feature">
+                <i class="fas fa-check-double"></i>
+                <h3>Verificação Numérica</h3>
+                <p>Valida os resultados calculando A*v - λ*v ≈ 0</p>
+            </div>
+        </div>
+
+        <div class="card">
+            <h2><i class="fas fa-code"></i> Código Fonte</h2>
+            <p>Implementação completa do algoritmo de cálculo de autovalores:</p>
+            
+            <div class="code-container">
+                <div class="code-header">
+                    <span>eigencalc.c</span>
+                    <button class="btn" style="padding: 0.3rem 0.8rem; font-size: 0.8rem;" onclick="copyCode()">
+                        <i class="fas fa-copy"></i> Copiar
+                    </button>
+                </div>
+                <div class="code-body">
+                    <pre><code id="sourceCode">#include &lt;stdio.h&gt;
+#include &lt;stdlib.h&gt;
+#include &lt;math.h&gt;
+#include &lt;string.h&gt;
+
+#define MAX_ITER 1000
+#define TOLERANCE 1e-10
+#define SIZE 3
+
+<span class="comment">// Função para multiplicar matriz por vetor</span>
+<span class="type">void</span> <span class="function">matriz_vetor_mult</span>(<span class="type">double</span> matriz[SIZE][SIZE], <span class="type">double</span> vetor[SIZE], <span class="type">double</span> resultado[SIZE]) {
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; SIZE; i++) {
+        resultado[i] = <span class="number">0.0</span>;
+        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; SIZE; j++) {
+            resultado[i] += matriz[i][j] * vetor[j];
+        }
+    }
+}
+
+<span class="comment">// Função para calcular o produto escalar</span>
+<span class="type">double</span> <span class="function">produto_escalar</span>(<span class="type">double</span> v1[SIZE], <span class="type">double</span> v2[SIZE]) {
+    <span class="type">double</span> resultado = <span class="number">0.0</span>;
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; SIZE; i++) {
+        resultado += v1[i] * v2[i];
+    }
+    <span class="keyword">return</span> resultado;
+}
+
+<span class="comment">// Função para normalizar um vetor</span>
+<span class="type">void</span> <span class="function">normalizar_vetor</span>(<span class="type">double</span> vetor[SIZE]) {
+    <span class="type">double</span> norma = <span class="function">sqrt</span>(<span class="function">produto_escalar</span>(vetor, vetor));
+    <span class="keyword">if</span> (norma &gt; <span class="number">0</span>) {
+        <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; SIZE; i++) {
+            vetor[i] /= norma;
+        }
+    }
+}
+
+<span class="comment">// Método da potência para encontrar autovalor e autovetor</span>
+<span class="type">void</span> <span class="function">metodo_potencia</span>(<span class="type">double</span> matriz[SIZE][SIZE], <span class="type">double</span> *autovalor, <span class="type">double</span> autovetor[SIZE]) {
+    <span class="type">double</span> vetor_anterior[SIZE], vetor_atual[SIZE];
+    <span class="type">double</span> autovalor_anterior;
+    <span class="type">int</span> iter;
+    
+    <span class="comment">// Vetor inicial</span>
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; SIZE; i++) {
+        vetor_atual[i] = <span class="number">1.0</span>;
+    }
+    <span class="function">normalizar_vetor</span>(vetor_atual);
+    
+    <span class="keyword">for</span> (iter = <span class="number">0</span>; iter &lt; MAX_ITER; iter++) {
+        <span class="function">memcpy</span>(vetor_anterior, vetor_atual, <span class="keyword">sizeof</span>(vetor_anterior));
+        autovalor_anterior = *autovalor;
+        
+        <span class="function">matriz_vetor_mult</span>(matriz, vetor_anterior, vetor_atual);
+        *autovalor = <span class="function">produto_escalar</span>(vetor_anterior, vetor_atual);
+        <span class="function">normalizar_vetor</span>(vetor_atual);
+        
+        <span class="keyword">if</span> (<span class="function">fabs</span>(*autovalor - autovalor_anterior) &lt; TOLERANCE) {
+            <span class="keyword">break</span>;
+        }
+    }
+    
+    <span class="function">memcpy</span>(autovetor, vetor_atual, <span class="keyword">sizeof</span>(vetor_atual));
+    <span class="function">printf</span>(<span class="string">"Convergiu em %d iterações\n"</span>, iter + <span class="number">1</span>);
+}
+
+<span class="comment">// Função principal com entrada de dados e execução</span>
+<span class="type">int</span> <span class="function">main</span>() {
+    <span class="type">double</span> matriz[SIZE][SIZE];
+    <span class="type">double</span> autovalores[SIZE];
+    <span class="type">double</span> autovetores[SIZE][SIZE];
+    
+    <span class="function">printf</span>(<span class="string">"=== CALCULADORA DE AUTOVALORES E AUTOVETORES 3x3 ===\n\n"</span>);
+    <span class="function">printf</span>(<span class="string">"Digite os elementos da matriz 3x3:\n"</span>);
+    
+    <span class="keyword">for</span> (<span class="type">int</span> i = <span class="number">0</span>; i &lt; SIZE; i++) {
+        <span class="keyword">for</span> (<span class="type">int</span> j = <span class="number">0</span>; j &lt; SIZE; j++) {
+            <span class="function">printf</span>(<span class="string">"Elemento [%d][%d]: "</span>, i + <span class="number">1</span>, j + <span class="number">1</span>);
+            <span class="function">scanf</span>(<span class="string">"%lf"</span>, &matriz[i][j]);
+        }
+    }
+    
+    <span class="comment">// ... (restante da implementação)</span>
+    
+    <span class="keyword">return</span> <span class="number">0</span>;
+}</code></pre>
+                </div>
+            </div>
+        </div>
+
+        <div class="back-link">
+            <a href="index.html" class="btn"><i class="fas fa-arrow-left"></i> Voltar ao Portfólio</a>
+        </div>
+    </div>
+
+    <script>
+        function copyCode() {
+            const code = document.getElementById('sourceCode').textContent;
+            navigator.clipboard.writeText(code).then(() => {
+                const btn = event.target.closest('button');
+                const originalHTML = btn.innerHTML;
+                btn.innerHTML = '<i class="fas fa-check"></i> Copiado!';
+                setTimeout(() => {
+                    btn.innerHTML = originalHTML;
+                }, 2000);
+            });
+        }
+    </script>
+</body>
+</html>
